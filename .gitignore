@@ -1,0 +1,10 @@
+my_env/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+chroma_db/
+*.wav
+*.mp3
+!sample_data/.gitkeep
+.env

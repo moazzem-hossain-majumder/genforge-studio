@@ -1,0 +1,24 @@
+gradio==5.23.2
+transformers==4.41.2
+# NOTE (GPU users): this plain `torch==2.2.2` pulls the CPU-only wheel from
+# PyPI. Install the CUDA build FIRST, before `pip install -r requirements.txt`,
+# so pip sees torch already satisfied and doesn't overwrite it:
+#   pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+# See the "GPU setup" section in README.md.
+torch==2.2.2
+accelerate==0.30.1
+bitsandbytes==0.43.1
+numpy==1.26.4
+sentencepiece==0.2.0
+requests==2.31.0
+bs4==0.0.2
+beautifulsoup4==4.12.3
+Pillow==10.3.0
+
+# RAG / PDF chatbot
+langchain==0.1.11
+langchain-community==0.0.27
+langchain-huggingface==0.0.3
+chromadb==0.4.24
+pypdf==4.2.0
+sentence-transformers==2.7.0
