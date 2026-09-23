@@ -1,0 +1,5 @@
+flask==3.0.3
+flask_cors==4.0.1
+transformers==4.41.2
+torch==2.2.2
+accelerate==0.30.1
