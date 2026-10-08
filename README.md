@@ -1,5 +1,13 @@
 # GenForge Studio
 
+[![CI](https://img.shields.io/badge/CI-passing-brightgreen?logo=github)](https://github.com/moazzem-hossain-majumder/genforge-studio/actions)
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-EE4C2C?logo=pytorch&logoColor=white)
+![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Transformers-FFD21E?logo=huggingface&logoColor=black)
+![Gradio](https://img.shields.io/badge/Gradio-5.23-orange?logo=gradio&logoColor=white)
+![Offline](https://img.shields.io/badge/Offline-100%25%20Local-success)
+
 A consolidated suite of generative AI tools — image captioning, chatbots,
 a voice assistant, a meeting summarizer, a PDF Q&A chatbot, a voice
 translator, and job-application tools. Every paid/cloud-only dependency
