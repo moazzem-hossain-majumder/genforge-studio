@@ -23,7 +23,7 @@ def synthesize_speech(text):
     if not text:
         return None
     tokenizer, model = get_tts()
-    inputs = tokenizer(text, return_tensors="pt")
+    inputs = tokenizer(text, return_tensors="pt").to(model.device)
     with __import__("torch").no_grad():
         output = model(**inputs).waveform
     audio = output.squeeze().cpu().numpy()

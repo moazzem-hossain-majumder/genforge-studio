@@ -35,7 +35,7 @@ def handle_prompt():
     history = "\n".join(conversation_history)
     prompt = history + f"\nUser: {input_text}\nBot:"
 
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=128)
     outputs = model.generate(
         **inputs,
         max_new_tokens=60,

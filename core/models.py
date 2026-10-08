@@ -27,10 +27,9 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BLIP_MODEL_ID = "Salesforce/blip-image-captioning-base"
 BLENDERBOT_MODEL_ID = "facebook/blenderbot-400M-distill"
 
-# Used only when a CUDA GPU is available (loaded 4-bit quantized).
-INSTRUCT_LLM_MODEL_ID_GPU = "microsoft/Phi-3-mini-4k-instruct"
-# Used as a CPU fallback — smaller and fast enough without a GPU.
-INSTRUCT_LLM_MODEL_ID_CPU = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
+# Used when a CUDA GPU is available or on CPU.
+INSTRUCT_LLM_MODEL_ID_GPU = "HuggingFaceTB/SmolLM2-135M-Instruct"
+INSTRUCT_LLM_MODEL_ID_CPU = "HuggingFaceTB/SmolLM2-135M-Instruct"
 
 WHISPER_MODEL_ID = "openai/whisper-tiny.en"
 TTS_MODEL_ID = "facebook/mms-tts-eng"

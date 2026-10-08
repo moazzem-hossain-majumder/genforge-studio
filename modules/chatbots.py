@@ -18,7 +18,7 @@ def blenderbot_reply(message, history):
     history_string = "\n".join(history_lines)
 
     prompt = history_string + f"\nUser: {message}\nBot:"
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=128).to(model.device)
     outputs = model.generate(
         **inputs,
         max_new_tokens=60,

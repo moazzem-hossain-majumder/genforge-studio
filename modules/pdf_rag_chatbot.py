@@ -8,7 +8,7 @@ model. Vector store is Chroma, same as the lab.
 
 import gradio as gr
 
-from core.models import get_embeddings, INSTRUCT_LLM_MODEL_ID
+from core.models import get_embeddings, INSTRUCT_LLM_MODEL_ID, DEVICE
 
 _state = {"chain": None}
 
@@ -24,6 +24,7 @@ def _build_local_llm():
         temperature=0.2,
         do_sample=True,
         repetition_penalty=1.2,
+        device=0 if DEVICE == "cuda" else -1,
     )
     return HuggingFacePipeline(pipeline=hf_pipe)
 
@@ -34,8 +35,11 @@ def process_pdf(pdf_file):
 
     from langchain_community.document_loaders import PyPDFLoader
     from langchain_text_splitters import RecursiveCharacterTextSplitter
+    try:
+        from langchain.chains import RetrievalQA
+    except ImportError:
+        from langchain_classic.chains import RetrievalQA
     from langchain_community.vectorstores import Chroma
-    from langchain.chains import RetrievalQA
 
     loader = PyPDFLoader(pdf_file.name if hasattr(pdf_file, "name") else pdf_file)
     documents = loader.load()

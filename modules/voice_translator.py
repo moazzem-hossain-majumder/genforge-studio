@@ -24,24 +24,41 @@ LANGUAGES = {
 
 
 def translate_text(text, target_lang_label):
-    tokenizer, model = get_translator()
-    target_code, _ = LANGUAGES[target_lang_label]
-    tokenizer.src_lang = "eng_Latn"
-    inputs = tokenizer(text, return_tensors="pt")
-    forced_bos_token_id = tokenizer.convert_tokens_to_ids(target_code)
-    generated = model.generate(
-        **inputs, forced_bos_token_id=forced_bos_token_id, max_new_tokens=200
-    )
-    return tokenizer.batch_decode(generated, skip_special_tokens=True)[0]
+    try:
+        from core.models import TRANSLATION_MODEL_ID, DEVICE
+        from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+        tokenizer = AutoTokenizer.from_pretrained(TRANSLATION_MODEL_ID, local_files_only=True)
+        model = AutoModelForSeq2SeqLM.from_pretrained(TRANSLATION_MODEL_ID, local_files_only=True).to(DEVICE)
+        target_code, _ = LANGUAGES[target_lang_label]
+        tokenizer.src_lang = "eng_Latn"
+        inputs = tokenizer(text, return_tensors="pt").to(model.device)
+        forced_bos_token_id = tokenizer.convert_tokens_to_ids(target_code)
+        generated = model.generate(
+            **inputs, forced_bos_token_id=forced_bos_token_id, max_new_tokens=200
+        )
+        return tokenizer.batch_decode(generated, skip_special_tokens=True)[0]
+    except Exception:
+        from core.models import instruct_chat
+        prompt = (
+            f"Translate the following English sentence to {target_lang_label}. "
+            f"Output only the translated text, nothing else:\n{text}"
+        )
+        return instruct_chat([{"role": "user", "content": prompt}], max_new_tokens=150)
 
 
 def synthesize(text, target_lang_label):
     _, tts_model_id = LANGUAGES[target_lang_label]
     try:
-        tokenizer, model = get_tts(tts_model_id)
+        from transformers import VitsModel, AutoTokenizer
+        from core.models import DEVICE
+        model = VitsModel.from_pretrained(tts_model_id, local_files_only=True).to(DEVICE)
+        tokenizer = AutoTokenizer.from_pretrained(tts_model_id, local_files_only=True)
     except Exception:
-        return None  # no TTS checkpoint available for this language
-    inputs = tokenizer(text, return_tensors="pt")
+        try:
+            tokenizer, model = get_tts()
+        except Exception:
+            return None
+    inputs = tokenizer(text, return_tensors="pt").to(model.device)
     with torch.no_grad():
         waveform = model(**inputs).waveform
     audio = waveform.squeeze().cpu().numpy()

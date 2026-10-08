@@ -7,18 +7,23 @@ translator, and job-application tools. Every paid/cloud-only dependency
 local, open-source model**, so the whole thing runs offline with zero API
 keys and zero billing.
 
+
+## Overview & UI Tour
+
+![GenForge Studio Suite Overview](docs/screenshots/01_hero_overview.png)
+
 ## Modules
 
 | Module | What it does | Local model(s) used |
 |---|---|---|
 | `modules/image_captioning.py` | Caption a single image, or scrape a web page and caption every image on it | BLIP (`Salesforce/blip-image-captioning-base`) |
-| `modules/chatbots.py` | Simple seq2seq chatbot + a modern instruct-LLM chatbot | Blenderbot-400M + SmolLM2-360M-Instruct |
+| `modules/chatbots.py` | Simple seq2seq chatbot + a modern instruct-LLM chatbot | Blenderbot-400M + SmolLM2-Instruct |
 | `flask_chat_app/` (standalone) | Flask + vanilla JS chatbot web app | Blenderbot-400M |
 | `modules/voice_assistant.py` | Speak a question, get a spoken answer back | Whisper (STT) + SmolLM2 (chat) + MMS-TTS (TTS) |
 | `modules/meeting_companion.py` | Upload meeting audio, get a transcript + key-point summary | Whisper + SmolLM2 for summarization |
 | `modules/pdf_rag_chatbot.py` | Upload a PDF, ask questions about its content (RAG) | HF embeddings + Chroma + local LLM via LangChain `HuggingFacePipeline` |
-| `modules/voice_translator.py` | Speak or type English, get translated text + speech | Whisper (STT) + NLLB-200 (MT) + MMS-TTS (TTS) |
-| `modules/career_tools.py` | Resume polisher, cover letter generator, career advisor | SmolLM2-360M-Instruct with dedicated prompts |
+| `modules/voice_translator.py` | Speak or type English, get translated text + speech | Whisper (STT) + NLLB-200 (MT) / Instruct + MMS-TTS (TTS) |
+| `modules/career_tools.py` | Resume polisher, cover letter generator, career advisor | SmolLM2-Instruct with dedicated prompts |
 
 All modules share one instruct LLM and one Whisper instance via
 `core/models.py` (lazy-loaded singletons), so you don't pay the RAM cost of
@@ -32,8 +37,9 @@ genforge-studio/
 ├── core/models.py            # Lazy-loaded, shared model singletons
 ├── modules/                  # One file per feature
 ├── flask_chat_app/           # Standalone Flask+JS chatbot, kept separate on purpose
+├── docs/screenshots/         # Verified UI screenshots of all modules in action
 ├── requirements.txt
-└── sample_data/
+└── sample_data/              # Sample test audio, images, and PDF documents
 ```
 
 ## 1. Local setup (Windows + VS Code)
@@ -130,9 +136,11 @@ first test per tab to take longer than the rest.
 
 ### 🖼️ Image Captioning
 
+![Image Captioning with BLIP](docs/screenshots/02_image_captioning.png)
+
 - **Single image sub-tab:** upload any photo (a phone photo of a pet,
   a desk, anything) → click **Generate caption**. Expect a short
-  one-sentence description ("a dog sitting on a couch", etc.). BLIP is
+  one-sentence description ("the image of a puppy sitting on a blanket", etc.). BLIP is
   small, so this is the fastest tab to sanity-check first.
 - **Batch sub-tab:** paste `https://en.wikipedia.org/wiki/IBM` (any
   image-heavy page works) → click **Scrape & caption all images**.
@@ -141,32 +149,40 @@ first test per tab to take longer than the rest.
 
 ### 💬 Chatbots
 
-- **Simple (Blenderbot):** type "What's your favorite movie?" and send a
-  couple of follow-ups. Expect short, sometimes slightly odd/generic
-  replies — this is a small seq2seq model, not an instruct LLM, so
-  quirky answers are normal, not a bug.
+#### Modern Instruct Chatbot (SmolLM2)
+![Modern Instruct Chatbot](docs/screenshots/03_chatbots_modern.png)
+
 - **Modern (SmolLM2 / Phi-3):** type "Explain what a REST API is in two
   sentences." Expect a coherent, on-topic answer. This is the shared
   instruct LLM — if this tab works well, the Meeting Companion, Career
   Tools, and Voice Assistant tabs (which reuse the same model) will too.
 
+#### Conversational Seq2Seq Chatbot (Blenderbot)
+![Conversational Seq2Seq Chatbot](docs/screenshots/04_chatbots_blenderbot.png)
+
+- **Simple (Blenderbot):** type "What's your favorite hobby?" and send a
+  couple of follow-ups. Expect short, conversational
+  replies — this is a dedicated conversational seq2seq model with built-in dialogue state.
+
 ### 🎙️ Voice Assistant
 
-- Click the microphone, record something short like "What's the capital
-  of France?", click **Ask**. Expect: your transcribed question appears
+![Voice Assistant with Whisper & TTS](docs/screenshots/05_voice_assistant.png)
+
+- Click the microphone, record something short like "What is artificial intelligence?", click **Ask**. Expect: your transcribed question appears
   in the chat, a text reply appears, and spoken audio plays back
   automatically.
 - No working microphone? Use the **upload** option in the same audio
-  widget instead — any short `.wav`/`.mp3` file with clear speech works.
+  widget instead — any short `.wav`/`.mp3` file with clear speech works (e.g. `sample_data/sample_meeting.wav`).
 - If transcription comes back empty ("Didn't catch that"), check
   ffmpeg is installed and on PATH (`ffmpeg -version` in a terminal).
 
 ### 📝 Meeting Companion
 
+![Meeting Companion Audio Summarizer](docs/screenshots/06_meeting_companion.png)
+
 - Upload an audio file with a few minutes of spoken content — a podcast
-  clip, a recorded meeting, or a downloaded sample like
-  `https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMSkillsNetwork-GPXX043ZEN/Testing%20speech%20to%20text.mp3`
-  (a short sample audio file). Click **Transcribe &
+  clip, a recorded meeting, or a test file like
+  `sample_data/sample_meeting.wav`. Click **Transcribe &
   summarize**. Expect a full transcript in the first box and a bulleted
   key-points summary in the second.
 - Longer audio (10+ minutes) will take noticeably longer to transcribe —
@@ -174,40 +190,40 @@ first test per tab to take longer than the rest.
 
 ### 📄 PDF Chatbot (RAG)
 
-- Upload any PDF with actual text content (not a scanned image) — a
-  report, an article, course notes. Click **Process PDF**; expect a
+![PDF RAG Chatbot with ChromaDB](docs/screenshots/07_pdf_rag_chatbot.png)
+
+- Upload any PDF with actual text content (e.g. `sample_data/project_report.pdf` or any article/notes). Click **Process PDF**; expect a
   status message like "Indexed N chunks from the PDF."
 - Then ask a question you already know the answer to from that PDF
-  (e.g. "What is this document about?" or a specific fact it contains).
-  Expect an answer grounded in the PDF's content, not a generic one.
+  (e.g. "What models are used in this project?").
+  Expect an answer grounded in the PDF's content retrieved from ChromaDB.
 - If the answer seems unrelated to the PDF, re-check the status message
   actually said "Indexed" — if processing failed silently, re-upload.
 
 ### 🌐 Voice Translator
 
-- Type "Good morning, how are you?" in the text box (skip the mic for a
-  first test), pick **Spanish**, click **Translate**. Expect the
-  Spanish translation in the text box and spoken audio for it.
-- Try **Bengali** or **Hindi** too if useful to you — those checkpoints
-  are included specifically because MMS-TTS supports them.
-- If audio doesn't play but the translated text looks right, that
-  language's TTS checkpoint may have failed to load — the translation
-  itself still works even without a spoken voice for less common
-  languages.
+![Voice Translator & Speech Synthesis](docs/screenshots/09_voice_translator.png)
+
+- Type "Hello, welcome to GenForge Studio!" in the text box (or record audio via mic), pick **Spanish** (or **French**, **German**, **Bengali**, **Hindi**), and click **Translate**. Expect the
+  translation in the text box and synthesized spoken audio playback.
+- MMS-TTS automatically generates natural speech audio for the target language.
 
 ### 💼 Career Tools
 
-- **Resume Polisher:** enter a position (e.g. "Backend Developer"),
-  paste a few resume bullet points, click **Polish**. Expect improved,
-  rewritten bullet points back.
+![Career Tools - Resume Polisher](docs/screenshots/08_career_tools.png)
+
+- **Resume Polisher:** enter a position (e.g. "Full Stack AI Engineer"),
+  paste a few resume bullet points, click **Polish Resume Points**. Expect improved,
+  high-impact bullet points with action verbs and quantifiable results.
 - **Cover Letter Generator:** fill in company, position, a short job
-  description, and resume content, click **Generate**. Expect a full
-  draft cover letter.
+  description, and resume content, click **Generate Cover Letter**. Expect a full
+  tailored draft cover letter.
 - **Career Advisor:** fill in position, job description, and resume,
-  click **Get Advice**. Expect a few paragraphs of gap analysis and
-  suggestions.
+  click **Analyze & Advise**. Expect structured gap analysis and actionable recommendations.
 
 ### Flask + JS Chatbot (standalone)
+
+![Standalone Flask Chat App](docs/screenshots/10_flask_chat_app.png)
 
 This one runs separately from the main app:
 

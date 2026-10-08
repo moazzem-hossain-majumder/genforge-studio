@@ -15,7 +15,7 @@ def caption_image(input_image: np.ndarray) -> str:
         return "Please upload an image."
     processor, model = get_blip()
     raw_image = Image.fromarray(input_image).convert("RGB")
-    inputs = processor(images=raw_image, text="the image of", return_tensors="pt")
+    inputs = processor(images=raw_image, text="the image of", return_tensors="pt").to(model.device)
     outputs = model.generate(**inputs, max_length=50)
     return processor.decode(outputs[0], skip_special_tokens=True)
 
@@ -52,7 +52,7 @@ def caption_page_images(url: str, max_images: int = 15) -> str:
             if raw_image.size[0] * raw_image.size[1] < 200:
                 continue
             raw_image = raw_image.convert("RGB")
-            inputs = processor(images=raw_image, text="the image of", return_tensors="pt")
+            inputs = processor(images=raw_image, text="the image of", return_tensors="pt").to(model.device)
             out = model.generate(**inputs, max_new_tokens=50)
             caption = processor.decode(out[0], skip_special_tokens=True)
             lines.append(f"{img_url} : {caption}")
